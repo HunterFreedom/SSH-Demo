@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+        "http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+    <!-- 开启动态调用 -->
+    <constant name="struts.enable.DynamicMethodInvocation" value="true"/>
+    <!-- 启动开发模式 -->
+    <constant name="struts.devMode" value="true"/>
+    <!-- 后缀名过滤 -->
+    <constant name="struts.action.extension" value="do"/>
+
+    <package name="mypackage" extends="struts-default" namespace="/">
+        <action name="*BookAction" class="com.neworin.action.BookAction" method="{1}">
+            <result name="success">/result.jsp</result>
+        </action>
+        <action name="queryAll" class="com.neworin.action.BookAction" method="queryAll">
+            <result name="success">/index.jsp</result>
+        </action>
+    </package>
+</struts>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+           http://www.springframework.org/schema/aop
+           http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+    <!--定义一个placeholder，用来读取jdbc.properties-->
+    <bean id="placeholder" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations" value="classpath:jdbc.properties"/>
+    </bean>
+    <!-- 定义数据源对象，注入属性 -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="driverClassName" value="${driverClassname}"/>
+        <property name="url" value="${url}"/>
+        <property name="username" value="${username}"/>
+        <property name="password" value="${password}"/>
+        <property name="maxActive" value="${maxActive}"/>
+        <!--初始化连接大小-->
+        <property name="initialSize" value="0"/>
+    </bean>
+
+    <!--配置hibernate的SessionFactory-->
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <!--注入数据源-->
+        <property name="dataSource" ref="dataSource"/>
+        <!--hibernate配置信息-->
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+                <prop key="show_sql">true</prop>
+                <prop key="format_sql">true</prop>
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+            </props>
+        </property>
+        <property name="packagesToScan" value="com.neworin.entity"/>
+    </bean>
+
+    <!--开启事务-->
+    <bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="get*" read-only="true"/>
+            <tx:method name="*"/>
+        </tx:attributes>
+    </tx:advice>
+    <!-- |第一个 * —— 通配 任意返回值类型|
+        |第二个 * —— 通配 包com.neworin.dao下的任意class|
+        |第三个 * —— 通配 包com.neworin.dao下的任意class的任意方法|
+        |第四个 .. —— 通配 方法可以有0个或多个参数| -->
+
+    <aop:config>
+        <aop:pointcut id="pointcut" expression="execution(* com.neworin.dao.impl.*.*(..))"/>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="pointcut"/>
+    </aop:config>
+
+    <bean id="bookDao" class="com.neworin.dao.impl.BookDaoImpl">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+    <bean id="bookService" class="com.neworin.service.impl.BookServiceImpl">
+        <property name="bookDao" ref="bookDao"/>
+    </bean>
+    <bean class="com.neworin.action.BookAction">
+        <property name="bookService" ref="bookService"/>
+    </bean>
+</beans>

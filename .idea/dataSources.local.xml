@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="dataSourceStorageLocal">
+    <data-source name="MySQL - @NewOrin" uuid="aa0a2902-8023-4b72-aafe-e54eb7ab3a39">
+      <secret-storage>master_key</secret-storage>
+      <user-name>root</user-name>
+      <schema-pattern>ssh_demo.*</schema-pattern>
+      <default-schemas>ssh_demo.*</default-schemas>
+    </data-source>
+  </component>
+</project>
